@@ -21,7 +21,7 @@ const handler = async (interaction: CommandInteraction) => {
   const countryCode = randomCountryCode();
   const flag = codeToImage(countryCode);
 
-  setFlag(interaction.channel, countries[countryCode]);
+  setFlag(interaction.channel, countryCode);
 
   await interaction.reply({
     content: "What country / region does this flag belong to?",

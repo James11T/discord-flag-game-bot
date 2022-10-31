@@ -1,3 +1,3 @@
-const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min) + min);
+const arrayRandom = <T>(array: T[]): T => array[Math.floor(Math.random() * array.length)];
 
-export { randomInt };
+export { arrayRandom };
