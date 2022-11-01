@@ -1,4 +1,6 @@
-import { arrayRandom } from "./utils";
+import { pastEntries } from "./game";
+import { CountryCode } from "./types";
+import { arrayRandomExclude } from "./utils";
 
 const { FLAG_IMAGE_REPO_PREFIX, FLAG_IMAGE_REPO_SUFFIX } = process.env;
 
@@ -69,7 +71,7 @@ const countries = {
   "ER": ["Eritrea"],
   "ES": ["Spain"],
   "ET": ["Ethiopia"],
-  "EU": ["Europe"],
+  "EU": ["European Union"],
   "FI": ["Finland"],
   "FJ": ["Fiji"],
   "FK": ["Falkland Islands", "Falklands"],
@@ -80,7 +82,7 @@ const countries = {
   "GB-ENG": ["England"],
   "GB-SCT": ["Scotland"],
   "GB-WLS": ["Wales"],
-  "GB": ["United Kingdom"],
+  "GB": ["United Kingdom", "UK"],
   "GD": ["Grenada"],
   "GE": ["Georgia"],
   "GG": ["Guernsey"],
@@ -89,7 +91,6 @@ const countries = {
   "GL": ["Greenland"],
   "GM": ["Gambia"],
   "GN": ["Guinea"],
-  "GP": ["Guadeloupe"],
   "GQ": ["Equatorial Guinea"],
   "GR": ["Greece"],
   "GS": ["South Georgia"],
@@ -142,7 +143,7 @@ const countries = {
   "MD": ["Moldova"],
   "ME": ["Montenegro"],
   "MG": ["Madagascar"],
-  "MH": ["Marshall Islands"],
+  "MH": ["Marshall Islands", "Marshall"],
   "MK": ["North Macedonia"],
   "ML": ["Mali"],
   "MM": ["Myanmar"],
@@ -187,8 +188,8 @@ const countries = {
   "RS": ["Serbia"],
   "RU": ["Russia"],
   "RW": ["Rwanda"],
-  "SA": ["Saudi Arabia"],
-  "SB": ["Solomon Islands"],
+  "SA": ["Saudi Arabia", "Saudi"],
+  "SB": ["Solomon Islands", "Solomon"],
   "SC": ["Seychelles"],
   "SD": ["Sudan"],
   "SE": ["Sweden"],
@@ -222,7 +223,7 @@ const countries = {
   "TZ": ["Tanzania"],
   "UA": ["Ukraine"],
   "UG": ["Uganda"],
-  "US": ["United States", "United States of America", "USA"],
+  "US": ["United States of America", "United States", "USA"],
   "UY": ["Uruguay"],
   "UZ": ["Uzbekistan"],
   "VC": ["Saint Vincent"],
@@ -239,12 +240,11 @@ const countries = {
   "ZW": ["Zimbabwe"]
 } as const;
 
-const countryCodes = Object.keys(countries);
+const countryCodes = Object.keys(countries) as CountryCode[];
 
-const codeToImage = (code: keyof typeof countries) =>
-  `${FLAG_IMAGE_REPO_PREFIX}${code.toLowerCase()}${FLAG_IMAGE_REPO_SUFFIX}`;
+const codeToImage = (code: CountryCode) => `${FLAG_IMAGE_REPO_PREFIX}${code.toLowerCase()}${FLAG_IMAGE_REPO_SUFFIX}`;
 
-const randomCountryCode = () => arrayRandom(countryCodes) as keyof typeof countries;
+const randomCountryCode = () => arrayRandomExclude(countryCodes, pastEntries) as CountryCode;
 
 export default countries;
 export { countryCodes, codeToImage, randomCountryCode };

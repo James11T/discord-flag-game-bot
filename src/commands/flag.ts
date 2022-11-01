@@ -1,6 +1,6 @@
+import { setFlag, game, newGame } from "../game";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import countries, { codeToImage, randomCountryCode } from "../countries";
-import { setFlag, game } from "../game";
+import { codeToImage, randomCountryCode } from "../countries";
 import type { CommandInteraction } from "discord.js";
 
 const command = new SlashCommandBuilder().setName("flag").setDescription("Guess a flag");
@@ -8,26 +8,7 @@ const command = new SlashCommandBuilder().setName("flag").setDescription("Guess 
 const handler = async (interaction: CommandInteraction) => {
   if (!interaction.channel) return;
 
-  if (game.active) {
-    if (!game.channel) return;
-
-    await interaction.reply({
-      content: `Sorry, there is already an active game.`,
-      ephemeral: true
-    });
-    return;
-  }
-
-  const countryCode = randomCountryCode();
-  const flag = codeToImage(countryCode);
-
-  setFlag(interaction.channel, countryCode);
-
-  await interaction.reply({
-    content: "What country / region does this flag belong to?",
-    files: [flag],
-    ephemeral: false
-  });
+  return newGame(interaction);
 };
 
 export { command, handler };

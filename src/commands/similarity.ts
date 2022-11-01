@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { compareTwoStrings } from "string-similarity";
-import { SIMILARITY_THRESHOLD } from "../game";
+import config from "../config";
 import type { CommandInteraction } from "discord.js";
 
 const command = new SlashCommandBuilder()
@@ -29,7 +29,7 @@ const handler = async (interaction: CommandInteraction) => {
   const similarityPercentage = Math.round(similarity * 10000) / 100;
 
   const message =
-    similarity >= SIMILARITY_THRESHOLD
+    similarity >= config.SIMILARITY_THRESHOLD
       ? "This **is** high enough to pass as correct."
       : "This **is not** high enough to pass as correct.";
 
