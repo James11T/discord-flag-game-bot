@@ -57,7 +57,7 @@ const countries = {
   "CW": ["Curacao"],
   "CX": ["Christmas Island"],
   "CY": ["Cyprus"],
-  "CZ": ["Czech Republic"],
+  "CZ": ["Czech Republic", "Czech"],
   "DE": ["Germany"],
   "DJ": ["Djibouti"],
   "DK": ["Denmark"],
