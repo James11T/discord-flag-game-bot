@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { compareTwoStrings } from "string-similarity";
-import config from "../config";
+import config from "../config.js";
 import type { CommandInteraction } from "discord.js";
 
 const command = new SlashCommandBuilder()

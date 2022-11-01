@@ -1,13 +1,19 @@
-import { ButtonInteraction, Client, CommandInteraction, GatewayIntentBits, Interaction } from "discord.js";
-import { commandCollection } from "./commands";
-import { newGame, processMessage, skipFlag } from "./game";
+import {
+  ActivityType,
+  ButtonInteraction,
+  Client,
+  CommandInteraction,
+  GatewayIntentBits,
+  Interaction,
+  ReactionUserManager
+} from "discord.js";
+import { commandCollection } from "./commands/index.js";
+import { newGame, processMessage, skipFlag } from "./game.js";
+
+const { GUILD_ID } = process.env;
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
-});
-
-client.on("ready", async (client: Client<true>) => {
-  console.log(`Ready as ${client.user.tag}`);
 });
 
 const handleCommandInteraction = async (interaction: CommandInteraction) => {
@@ -35,6 +41,30 @@ const handleButtonInteraction = async (interaction: ButtonInteraction) => {
   }
 };
 
+const getMember = async (id: string) => {
+  const guild = client.guilds.cache.get(GUILD_ID);
+  if (!guild) return null;
+
+  const cachedUser = guild.members.cache.get(id);
+  if (cachedUser) return cachedUser;
+
+  const member = await guild.members.fetch({ user: id });
+  return member ?? null;
+};
+
+const getMemberNickname = async (id: string) => {
+  const member = await getMember(id);
+  if (!member) return id;
+  return member.nickname;
+};
+
+client.on("ready", async (client: Client<true>) => {
+  console.log(`Ready as ${client.user.tag}`);
+  client.user.setActivity("/flag", {
+    type: ActivityType.Watching
+  });
+});
+
 client.on("interactionCreate", async (interaction: Interaction) => {
   if (interaction.isCommand()) return handleCommandInteraction(interaction);
   if (interaction.isButton()) return handleButtonInteraction(interaction);
@@ -47,3 +77,4 @@ client.on("messageUpdate", (_, newMessage) => {
 });
 
 export default client;
+export { getMember, getMemberNickname };

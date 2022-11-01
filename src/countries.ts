@@ -1,6 +1,6 @@
-import { pastEntries } from "./game";
-import { CountryCode } from "./types";
-import { arrayRandomExclude } from "./utils";
+import { pastEntries } from "./game.js";
+import { arrayRandomExclude } from "./utils.js";
+import type { CountryCode } from "./types.js";
 
 const { FLAG_IMAGE_REPO_PREFIX, FLAG_IMAGE_REPO_SUFFIX } = process.env;
 

@@ -1,7 +1,7 @@
-import config from "./config";
-import countries, { codeToImage, countryCodes, randomCountryCode } from "./countries";
+import config from "./config.js";
+import countries, { codeToImage, countryCodes, randomCountryCode } from "./countries.js";
 import { compareTwoStrings } from "string-similarity";
-import type { CountryCode } from "./types";
+import type { CountryCode } from "./types.js";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -12,6 +12,7 @@ import {
   MessageActionRowComponentBuilder,
   TextBasedChannel
 } from "discord.js";
+import { getScore, incrementScore } from "./db.js";
 
 interface ActiveGame {
   channel: TextBasedChannel;
@@ -112,8 +113,11 @@ const processMessage = async (message: Message) => {
     return console.log("Wrong country");
 
   clearFlag(false);
-
-  await message.reply({ content: `Correct! It was \`${countryNames[0]}\``, components: [playAgainRow] });
+  await incrementScore(message.author);
+  await message.reply({
+    content: `Correct! It was \`${countryNames[0]}\`. Your score is now \` ${getScore(message.author) ?? "Unknown"} \``,
+    components: [playAgainRow]
+  });
 };
 
 const newGame = async (interaction: ButtonInteraction | CommandInteraction) => {

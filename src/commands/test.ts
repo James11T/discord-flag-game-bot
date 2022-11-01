@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import type { CommandInteraction } from "discord.js";
-import { getClosestCountry } from "../game";
+import { getClosestCountry } from "../game.js";
 
 const command = new SlashCommandBuilder()
   .setName("closest")

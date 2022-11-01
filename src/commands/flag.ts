@@ -1,6 +1,5 @@
-import { setFlag, game, newGame } from "../game";
+import { newGame } from "../game.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { codeToImage, randomCountryCode } from "../countries";
 import type { CommandInteraction } from "discord.js";
 
 const command = new SlashCommandBuilder().setName("flag").setDescription("Guess a flag");

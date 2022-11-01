@@ -1,4 +1,4 @@
-import type { Command } from "./src/types";
+import type { Command } from "./src/types.js";
 
 declare global {
   namespace NodeJS {
