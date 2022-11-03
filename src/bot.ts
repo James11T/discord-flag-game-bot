@@ -61,7 +61,7 @@ const getMember = async (id: string) => {
 const getMemberNickname = async (id: string) => {
   const member = await getMember(id);
   if (!member) return id;
-  return member.nickname;
+  return member.nickname ?? member.user.username;
 };
 
 client.on("ready", async (client: Client<true>) => {
