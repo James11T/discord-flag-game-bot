@@ -8,7 +8,7 @@ import {
   ReactionUserManager
 } from "discord.js";
 import { commandCollection } from "./commands/index.js";
-import { newGame, processMessage, skipFlag } from "./game.js";
+import { newGame, processMessage, revealCode, skipFlag } from "./game.js";
 
 const { GUILD_ID } = process.env;
 
@@ -33,12 +33,18 @@ const handleCommandInteraction = async (interaction: CommandInteraction) => {
   }
 };
 
+const interactions = {
+  playagain: newGame,
+  skip: skipFlag,
+  code: revealCode
+} as const;
+
+const isInteraction = (key: string): key is keyof typeof interactions => key in interactions;
+
 const handleButtonInteraction = async (interaction: ButtonInteraction) => {
-  if (interaction.customId === "playagain") {
-    newGame(interaction);
-  } else if (interaction.customId === "skip") {
-    skipFlag(interaction);
-  }
+  if (!isInteraction(interaction.customId)) return;
+
+  interactions[interaction.customId](interaction);
 };
 
 const getMember = async (id: string) => {

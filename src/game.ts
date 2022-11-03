@@ -14,13 +14,17 @@ import {
 } from "discord.js";
 import { getScore, incrementScore } from "./db.js";
 
-interface ActiveGame {
+interface BaseGame {
+  codeRevealed: boolean;
+}
+
+interface ActiveGame extends BaseGame {
   channel: TextBasedChannel;
   active: true;
   country: CountryCode;
 }
 
-interface InactiveGame {
+interface InactiveGame extends BaseGame {
   channel: null;
   active: false;
   country: null;
@@ -31,25 +35,53 @@ type Game = ActiveGame | InactiveGame;
 let game: Game = {
   channel: null,
   active: false,
-  country: null
+  country: null,
+  codeRevealed: false
 };
 
 let failTimeout: NodeJS.Timeout;
 const pastEntries: CountryCode[] = [];
 
-const playAgainRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
-  new ButtonBuilder().setCustomId("playagain").setLabel("Play Again").setStyle(ButtonStyle.Primary)
+const skipButton = new ButtonBuilder().setCustomId("skip").setLabel("Skip").setStyle(ButtonStyle.Danger);
+const skipUsedButton = new ButtonBuilder()
+  .setCustomId("skip")
+  .setLabel("Skip")
+  .setStyle(ButtonStyle.Danger)
+  .setDisabled(true);
+const revealCodeButton = new ButtonBuilder().setCustomId("code").setLabel("Reveal Code").setStyle(ButtonStyle.Primary);
+const revealCodeUsedButton = new ButtonBuilder()
+  .setCustomId("code")
+  .setLabel("Reveal Code")
+  .setStyle(ButtonStyle.Primary)
+  .setDisabled(true);
+const playAgainButton = new ButtonBuilder()
+  .setCustomId("playagain")
+  .setLabel("Play Again")
+  .setStyle(ButtonStyle.Primary);
+
+const playAgainRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(playAgainButton);
+
+const flagControls = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+  skipButton,
+  revealCodeButton
 );
 
-const skipRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
-  new ButtonBuilder().setCustomId("skip").setLabel("Skip").setStyle(ButtonStyle.Danger)
+const flagRevealUsedControls = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+  skipButton,
+  revealCodeUsedButton
+);
+
+const flagDisabledControls = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+  skipUsedButton,
+  revealCodeUsedButton
 );
 
 const setFlag = (channel: TextBasedChannel, country: CountryCode) => {
   game = {
     channel: channel,
     active: true,
-    country: country
+    country: country,
+    codeRevealed: false
   };
 
   pastEntries.unshift(country);
@@ -68,7 +100,10 @@ const clearFlag = async (timeout = true) => {
   const countryNames = countries[game.country];
 
   if (timeout && game.channel && game.country) {
-    await game.channel.send(`Nobody managed to guess the flag in time, it was \`${countryNames[0]}\``);
+    await game.channel.send({
+      content: `Nobody managed to guess the flag in time, it was \`${countryNames[0]}\``,
+      components: [playAgainRow]
+    });
   } else {
     clearTimeout(failTimeout);
   }
@@ -76,7 +111,8 @@ const clearFlag = async (timeout = true) => {
   game = {
     active: false,
     country: null,
-    channel: null
+    channel: null,
+    codeRevealed: false
   };
 };
 
@@ -102,15 +138,14 @@ const getClosestCountry = (query: string): [CountryCode, number] => {
 
 const processMessage = async (message: Message) => {
   if (message.author.bot) return;
-  if (!game.active) return console.log("No active game");
-  if (message.channel.id !== game.channel.id) return console.log("Wrong channel");
+  if (!game.active) return;
+  if (message.channel.id !== game.channel.id) return;
 
   const content = message.content.toLowerCase();
   const countryNames = countries[game.country];
   const [closestCountry, closestSimilarity] = getClosestCountry(content);
 
-  if (closestCountry !== game.country || closestSimilarity < config.SIMILARITY_THRESHOLD)
-    return console.log("Wrong country");
+  if (closestCountry !== game.country || closestSimilarity < config.SIMILARITY_THRESHOLD) return;
 
   clearFlag(false);
   await incrementScore(message.author);
@@ -137,9 +172,9 @@ const newGame = async (interaction: ButtonInteraction | CommandInteraction) => {
   setFlag(interaction.channel, countryCode);
 
   await interaction.reply({
-    content: `What country / territory does this flag belong to? Country Code: || ${countryCode} ||`,
+    content: "What country / territory does this flag belong to?",
     files: [flag],
-    components: [skipRow],
+    components: [flagControls],
     ephemeral: false
   });
 };
@@ -149,10 +184,16 @@ const skipFlag = async (interaction: ButtonInteraction | CommandInteraction) => 
 
   if (!game.active) {
     await interaction.reply({
-      content: `There currently not an active game.`,
+      content: "There currently not an active game.",
       ephemeral: true
     });
     return;
+  }
+
+  clearFlag(false);
+
+  if (interaction.isMessageComponent()) {
+    await interaction.message.edit({ components: [flagDisabledControls] });
   }
 
   await interaction.reply({
@@ -160,8 +201,47 @@ const skipFlag = async (interaction: ButtonInteraction | CommandInteraction) => 
     ephemeral: false,
     components: [playAgainRow]
   });
-
-  clearFlag(false);
 };
 
-export { game, pastEntries, playAgainRow, setFlag, clearFlag, processMessage, getClosestCountry, newGame, skipFlag };
+const revealCode = async (interaction: ButtonInteraction | CommandInteraction) => {
+  if (!interaction.channel) return;
+
+  if (!game.active) {
+    await interaction.reply({
+      content: "There currently not an active game.",
+      ephemeral: true
+    });
+    return;
+  }
+
+  if (game.codeRevealed) {
+    await interaction.reply({
+      content: `Code already revealed`,
+      ephemeral: true
+    });
+    return;
+  }
+
+  game.codeRevealed = true;
+  if (interaction.isMessageComponent()) {
+    interaction.message.edit({ components: [flagRevealUsedControls] });
+  }
+
+  await interaction.reply({
+    content: `The country code of the current flag is  \` ${game.country} \``,
+    ephemeral: false
+  });
+};
+
+export {
+  game,
+  pastEntries,
+  playAgainRow,
+  setFlag,
+  clearFlag,
+  processMessage,
+  getClosestCountry,
+  newGame,
+  skipFlag,
+  revealCode
+};
