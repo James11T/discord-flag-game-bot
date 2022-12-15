@@ -17,7 +17,7 @@ const handler = async (interaction: CommandInteraction) => {
   const country = interaction.options.get("country")?.value;
 
   if (!country) {
-    await interaction.reply({ content: "Bad paramter", ephemeral: true });
+    await interaction.reply({ content: "Bad parameter", ephemeral: true });
     return;
   }
 
@@ -33,6 +33,7 @@ const handler = async (interaction: CommandInteraction) => {
   }
 
   await interaction.reply({
+    content: `The flag of \` ${countries[countryCode]} \``,
     files: [codeToImage(countryCode)],
     ephemeral: false
   });

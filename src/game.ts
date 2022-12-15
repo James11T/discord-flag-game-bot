@@ -190,6 +190,8 @@ const skipFlag = async (interaction: ButtonInteraction | CommandInteraction) => 
     return;
   }
 
+  const skipMessage = `Skipped flag, it was \`${countries[game.country][0]}\``;
+
   clearFlag(false);
 
   if (interaction.isMessageComponent()) {
@@ -197,7 +199,7 @@ const skipFlag = async (interaction: ButtonInteraction | CommandInteraction) => 
   }
 
   await interaction.reply({
-    content: `Skipped flag, it was \`${countries[game.country][0]}\``,
+    content: skipMessage,
     ephemeral: false,
     components: [playAgainRow]
   });
